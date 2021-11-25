@@ -3,7 +3,7 @@ using Moq;
 using SportsStore.Controllers;
 using SportsStore.Models;
 using SportsStore.Models.ViewModels;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -16,15 +16,12 @@ namespace SportsStore.Tests
         {
             //Arrange
             Mock<IStoreRepository> mock = new();
-            mock.Setup(m => m.Products).Returns((new Product[] {
-                 new Product {ProductID = 1, Name = "P1"},
-                 new Product {ProductID = 2, Name = "P2"},
-             }).AsQueryable<Product>());
+            SetupTwoProducts(mock);
 
             HomeController controller = new HomeController(mock.Object);
 
             //Act
-            var result = (controller.Index() as ViewResult).ViewData.Model 
+            var result = (controller.Index(null) as ViewResult).ViewData.Model 
                 as ProductsListViewModel;
 
             // Assert
@@ -39,13 +36,13 @@ namespace SportsStore.Tests
         {
             //Arrange
             Mock<IStoreRepository> mock = new();
-            SetupMock(mock);
+            SetupFiveProducts(mock);
 
             HomeController controller = new(mock.Object);
             controller.PageSize = 3;
 
             // Act
-            var result = (controller.Index(2) as ViewResult).ViewData.Model
+            var result = (controller.Index(null, 2) as ViewResult).ViewData.Model
                 as ProductsListViewModel;
             // Assert
             Product[] products = result.Products.ToArray();
@@ -59,14 +56,14 @@ namespace SportsStore.Tests
         {
             // Arrange
             Mock<IStoreRepository> mock = new Mock<IStoreRepository>();
-            SetupMock(mock);
+            SetupFiveProducts(mock);
 
             // Arrange
             var controller = new HomeController(mock.Object) { PageSize = 3 };
 
             // Act
             ProductsListViewModel result =
-            controller.Index(2).ViewData.Model as ProductsListViewModel;
+            controller.Index(null, 2).ViewData.Model as ProductsListViewModel;
 
             // Assert
             PagingInfo pageInfo = result.PagingInfo;
@@ -76,14 +73,69 @@ namespace SportsStore.Tests
             Assert.Equal(2, pageInfo.TotalPages);
         }
 
-        private static void SetupMock(Mock<IStoreRepository> mock)
+        [Fact]
+        public void Can_Filter_Products()
+        {
+            // Arrange
+            // - create the mock repository
+            Mock<IStoreRepository> mock = new Mock<IStoreRepository>();
+            SetupFiveProducts(mock);
+            // Arrange - create a controller and make the page size 3 items
+            HomeController controller = new (mock.Object);
+            controller.PageSize = 3;
+
+            // Action
+            Product[] result =
+                (controller.Index("Cat2", 1).ViewData.Model as ProductsListViewModel)
+                    .Products.ToArray();
+
+            // Assert
+            Assert.Equal(2, result.Length);
+            Assert.True(result[0].Name == "P2" && result[0].Category == "Cat2");
+            Assert.True(result[1].Name == "P4" && result[1].Category == "Cat2");
+        }
+
+        [Fact]
+        public void Generate_Category_Specific_Product_Count()
+        {
+            // Arrange
+            Mock<IStoreRepository> mock = new ();
+            SetupFiveProducts(mock);
+            HomeController target = new (mock.Object);
+            target.PageSize = 3;
+
+            Func<ViewResult, ProductsListViewModel> GetModel = 
+                result => result?.ViewData?.Model as ProductsListViewModel;
+
+            // Action
+            int? res1 = GetModel(target.Index("Cat1"))?.PagingInfo.TotalItems;
+            int? res2 = GetModel(target.Index("Cat2"))?.PagingInfo.TotalItems;
+            int? res3 = GetModel(target.Index("Cat3"))?.PagingInfo.TotalItems;
+            int? resAll = GetModel(target.Index(null))?.PagingInfo.TotalItems;
+
+            // Assert
+            Assert.Equal(2, res1);
+            Assert.Equal(2, res2);
+            Assert.Equal(1, res3);
+            Assert.Equal(5, resAll);
+        }
+
+        private static void SetupFiveProducts(Mock<IStoreRepository> mock)
+        {
+            mock.Setup(m => m.Products).Returns((new Product[] {
+                 new Product {ProductID = 1, Name = "P1", Category = "Cat1"},
+                 new Product {ProductID = 2, Name = "P2", Category = "Cat2"},
+                 new Product {ProductID = 3, Name = "P3", Category = "Cat1"},
+                 new Product {ProductID = 4, Name = "P4", Category = "Cat2"},
+                 new Product {ProductID = 5, Name = "P5", Category = "Cat3"}
+             }).AsQueryable<Product>());
+        }
+
+        private static void SetupTwoProducts(Mock<IStoreRepository> mock)
         {
             mock.Setup(m => m.Products).Returns((new Product[] {
                  new Product {ProductID = 1, Name = "P1"},
                  new Product {ProductID = 2, Name = "P2"},
-                 new Product {ProductID = 3, Name = "P3"},
-                 new Product {ProductID = 4, Name = "P4"},
-                 new Product {ProductID = 5, Name = "P5"}
              }).AsQueryable<Product>());
         }
     }
