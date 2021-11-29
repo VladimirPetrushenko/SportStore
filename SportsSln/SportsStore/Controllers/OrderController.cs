@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SportsStore.Models;
+using SportsStore.Storage.Models;
+using SportsStore.Storage.Repositories;
 
 namespace SportsStore.Controllers
 {
@@ -27,7 +28,7 @@ namespace SportsStore.Controllers
             if (ModelState.IsValid)
             {
                 order.Lines = _cart.Lines.ToArray();
-                _repository.SaveOrder(order);
+                _repository.Save(order);
                 _cart.Clear();
 
                 return RedirectToPage("/Completed", new { order.OrderID }); 

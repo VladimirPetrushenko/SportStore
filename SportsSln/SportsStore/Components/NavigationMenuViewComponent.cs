@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SportsStore.Models;
+using SportsStore.Storage.Models;
+using SportsStore.Storage.Repositories;
 using System.Linq;
 
 namespace SportsStore.Components

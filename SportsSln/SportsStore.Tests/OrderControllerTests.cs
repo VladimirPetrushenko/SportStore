@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SportsStore.Controllers;
-using SportsStore.Models;
+using SportsStore.Storage.Models;
+using SportsStore.Storage.Repositories;
 using Xunit;
+
 namespace SportsStore.Tests
 {
- public class OrderControllerTests
+    public class OrderControllerTests
     {
         [Fact]
         public void Cannot_Checkout_Empty_Cart()
@@ -13,17 +15,17 @@ namespace SportsStore.Tests
             // Arrange - create a mock repository
             Mock<IRepository<Order>> mock = new();
             // Arrange - create an empty cart
-            Cart cart = new Cart();
+            Cart cart = new();
             // Arrange - create the order
-            Order order = new Order();
+            Order order = new();
             // Arrange - create an instance of the controller
-            OrderController target = new OrderController(mock.Object, cart);
+            OrderController target = new(mock.Object, cart);
 
             // Act
             var result = target.Checkout(order) as ViewResult;
 
             // Assert - check that the order hasn't been stored
-            mock.Verify(m => m.SaveOrder(It.IsAny<Order>()), Times.Never);
+            mock.Verify(m => m.Save(It.IsAny<Order>()), Times.Never);
             // Assert - check that the method is returning the default view
             Assert.True(string.IsNullOrEmpty(result.ViewName));
             // Assert - check that I am passing an invalid model to the view
@@ -36,10 +38,10 @@ namespace SportsStore.Tests
             // Arrange - create a mock order repository
             Mock<IRepository<Order>> mock = new();
             // Arrange - create a cart with one item
-            Cart cart = new Cart();
+            Cart cart = new();
             cart.AddItem(new Product(), 1);
             // Arrange - create an instance of the controller
-            OrderController target = new OrderController(mock.Object, cart);
+            OrderController target = new(mock.Object, cart);
             // Arrange - add an error to the model
             target.ModelState.AddModelError("error", "error");
 
@@ -47,7 +49,7 @@ namespace SportsStore.Tests
             var result = target.Checkout(new Order()) as ViewResult;
 
             // Assert - check that the order hasn't been passed stored
-            mock.Verify(m => m.SaveOrder(It.IsAny<Order>()), Times.Never);
+            mock.Verify(m => m.Save(It.IsAny<Order>()), Times.Never);
             // Assert - check that the method is returning the default view
             Assert.True(string.IsNullOrEmpty(result.ViewName));
             // Assert - check that I am passing an invalid model to the view
@@ -60,16 +62,16 @@ namespace SportsStore.Tests
             // Arrange - create a mock order repository
             Mock<IRepository<Order>> mock = new();
             // Arrange - create a cart with one item
-            Cart cart = new Cart();
+            Cart cart = new();
             cart.AddItem(new Product(), 1);
             // Arrange - create an instance of the controller
-            OrderController target = new OrderController(mock.Object, cart);
+            OrderController target = new(mock.Object, cart);
 
             // Act - try to checkout
             var result = target.Checkout(new Order()) as RedirectToPageResult;
 
             // Assert - check that the order has been stored
-            mock.Verify(m => m.SaveOrder(It.IsAny<Order>()), Times.Once);
+            mock.Verify(m => m.Save(It.IsAny<Order>()), Times.Once);
             // Assert - check that the method is redirecting to the Completed action
             Assert.Equal("/Completed", result.PageName);
         }

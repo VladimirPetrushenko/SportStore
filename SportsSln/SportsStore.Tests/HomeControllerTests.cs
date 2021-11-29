@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SportsStore.Controllers;
-using SportsStore.Models;
-using SportsStore.Models.ViewModels;
+using SportsStore.Storage.Models;
+using SportsStore.Storage.Models.ViewModels;
+using SportsStore.Storage.Repositories;
 using System;
 using System.Linq;
 using Xunit;

@@ -2,12 +2,9 @@
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Moq;
-using SportsStore.Infrastructure;
-using SportsStore.Models.ViewModels;
-using System;
+using SportsStore.Storage.Infrastructure;
+using SportsStore.Storage.Models.ViewModels;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
