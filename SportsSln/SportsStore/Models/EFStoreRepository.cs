@@ -2,7 +2,7 @@
 
 namespace SportsStore.Models
 {
-    public class EFStoreRepository : IStoreRepository
+    public class EFStoreRepository : IRepository<Product>
     {
         private readonly StoreDbContext _context;
 
@@ -11,6 +11,11 @@ namespace SportsStore.Models
             _context = context;
         }
 
-        public IQueryable<Product> Products => _context.Products;
+        public IQueryable<Product> Items => _context.Products;
+
+        public void SaveOrder(Product order)
+        {
+            _context.SaveChanges();
+        }
     }
 }

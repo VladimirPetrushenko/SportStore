@@ -15,8 +15,8 @@ namespace SportsStore.Tests
         public void Can_Select_Categories()
         {
             // Arrange
-            Mock<IStoreRepository> mock = new ();
-            mock.Setup(m => m.Products).Returns((new Product[] {
+            Mock<IRepository<Product>> mock = new ();
+            mock.Setup(m => m.Items).Returns((new Product[] {
                  new Product {ProductID = 1, Name = "P1", Category = "Apples"},
                  new Product {ProductID = 2, Name = "P2", Category = "Apples"},
                  new Product {ProductID = 3, Name = "P3", Category = "Plums"},
@@ -41,8 +41,8 @@ namespace SportsStore.Tests
         {
             // Arrange
             string categoryToSelect = "Apples";
-            Mock<IStoreRepository> mock = new ();
-            mock.Setup(m => m.Products).Returns((new Product[] {
+            Mock<IRepository<Product>> mock = new ();
+            mock.Setup(m => m.Items).Returns((new Product[] {
                  new Product {ProductID = 1, Name = "P1", Category = "Apples"},
                  new Product {ProductID = 4, Name = "P2", Category = "Oranges"},
             }).AsQueryable<Product>());

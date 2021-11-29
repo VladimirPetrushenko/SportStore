@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,11 +25,15 @@ namespace SportsStore
             {
                 options.UseSqlServer(configuration["ConnectionStrings:SportsStoreConnection"]);
             });
-            services.AddScoped<IStoreRepository, EFStoreRepository>();
+            services.AddScoped<IRepository<Product>, EFStoreRepository>();
+            services.AddScoped<IRepository<Order>, EFOrderRepository>();
 
             services.AddRazorPages();
             services.AddDistributedMemoryCache();
             services.AddSession();
+            services.AddScoped<Cart>(sp => SessionCart.GetCart(sp));
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddServerSideBlazor();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -59,6 +64,8 @@ namespace SportsStore
 
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/admin/{*catchall}", "/Admin/Index");
             });
             SeedData.EnsurePopulated(app);
         }

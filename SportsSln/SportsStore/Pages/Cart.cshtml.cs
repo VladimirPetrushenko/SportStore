@@ -8,11 +8,12 @@ namespace SportsStore.Pages
 {
     public class CartModel : PageModel
     {
-        private readonly IStoreRepository _repository;
+        private readonly IRepository<Product> _repository;
 
-        public CartModel(IStoreRepository repository)
+        public CartModel(IRepository<Product> repository, Cart carService)
         {
             _repository = repository;
+            Cart = carService;
         }
 
         public Cart Cart { get; set; }
@@ -21,16 +22,23 @@ namespace SportsStore.Pages
         public void OnGet(string returnUrl)
         {
             ReturnUrl = returnUrl ?? "/";
-            Cart = HttpContext.Session.GetJson<Cart>("cart") ?? new Cart();
         }
 
         public IActionResult OnPost(long productId, string returnUrl)
         {
-            Product product = _repository.Products
-            .FirstOrDefault(p => p.ProductID == productId);
-            Cart = HttpContext.Session.GetJson<Cart>("cart") ?? new Cart();
+            Product product = _repository.Items
+                .FirstOrDefault(p => p.ProductID == productId);
+
             Cart.AddItem(product, 1);
-            HttpContext.Session.SetJson("cart", Cart);
+
+            return RedirectToPage(new { returnUrl });
+        }
+
+        public IActionResult OnPostRemove(long productId, string returnUrl)
+        {
+            Cart.RemoveLine(
+                Cart.Lines.First(l => l.Product.ProductID == productId).Product
+            );
             return RedirectToPage(new { returnUrl });
         }
     }

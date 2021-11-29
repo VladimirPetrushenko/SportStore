@@ -15,10 +15,10 @@ namespace SportsStore.Tests
         public void Can_Use_Repository()
         {
             //Arrange
-            Mock<IStoreRepository> mock = new();
+            Mock<IRepository<Product>> mock = new();
             SetupTwoProducts(mock);
 
-            HomeController controller = new HomeController(mock.Object);
+            HomeController controller = new(mock.Object);
 
             //Act
             var result = (controller.Index(null) as ViewResult).ViewData.Model 
@@ -35,7 +35,7 @@ namespace SportsStore.Tests
         public void Can_Paginate()
         {
             //Arrange
-            Mock<IStoreRepository> mock = new();
+            Mock<IRepository<Product>> mock = new();
             SetupFiveProducts(mock);
 
             HomeController controller = new(mock.Object);
@@ -55,11 +55,11 @@ namespace SportsStore.Tests
         public void Can_Send_Pagination_View_Model()
         {
             // Arrange
-            Mock<IStoreRepository> mock = new Mock<IStoreRepository>();
+            Mock<IRepository<Product>> mock = new();
             SetupFiveProducts(mock);
 
             // Arrange
-            var controller = new HomeController(mock.Object) { PageSize = 3 };
+            HomeController controller = new (mock.Object) { PageSize = 3 };
 
             // Act
             ProductsListViewModel result =
@@ -78,7 +78,7 @@ namespace SportsStore.Tests
         {
             // Arrange
             // - create the mock repository
-            Mock<IStoreRepository> mock = new Mock<IStoreRepository>();
+            Mock<IRepository<Product>> mock = new();
             SetupFiveProducts(mock);
             // Arrange - create a controller and make the page size 3 items
             HomeController controller = new (mock.Object);
@@ -99,7 +99,7 @@ namespace SportsStore.Tests
         public void Generate_Category_Specific_Product_Count()
         {
             // Arrange
-            Mock<IStoreRepository> mock = new ();
+            Mock<IRepository<Product>> mock = new ();
             SetupFiveProducts(mock);
             HomeController target = new (mock.Object);
             target.PageSize = 3;
@@ -120,9 +120,9 @@ namespace SportsStore.Tests
             Assert.Equal(5, resAll);
         }
 
-        private static void SetupFiveProducts(Mock<IStoreRepository> mock)
+        private static void SetupFiveProducts(Mock<IRepository<Product>> mock)
         {
-            mock.Setup(m => m.Products).Returns((new Product[] {
+            mock.Setup(m => m.Items).Returns((new Product[] {
                  new Product {ProductID = 1, Name = "P1", Category = "Cat1"},
                  new Product {ProductID = 2, Name = "P2", Category = "Cat2"},
                  new Product {ProductID = 3, Name = "P3", Category = "Cat1"},
@@ -131,9 +131,9 @@ namespace SportsStore.Tests
              }).AsQueryable<Product>());
         }
 
-        private static void SetupTwoProducts(Mock<IStoreRepository> mock)
+        private static void SetupTwoProducts(Mock<IRepository<Product>> mock)
         {
-            mock.Setup(m => m.Products).Returns((new Product[] {
+            mock.Setup(m => m.Items).Returns((new Product[] {
                  new Product {ProductID = 1, Name = "P1"},
                  new Product {ProductID = 2, Name = "P2"},
              }).AsQueryable<Product>());
